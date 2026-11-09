@@ -259,6 +259,36 @@ public class BindRequestImplTest
             }
 
 
+            public boolean isSimpleOtp()
+            {
+                return false;
+            }
+
+
+            public BindRequest setSimpleOtp( boolean a_isSimpleOtp )
+            {
+                return this;
+            }
+
+
+            public byte[] getOtpValue()
+            {
+                return null;
+            }
+
+
+            public BindRequest setOtpValue( byte[] otpValue )
+            {
+                return this;
+            }
+
+
+            public BindRequest setOtpValue( String otpValue )
+            {
+                return this;
+            }
+
+
             public String getName()
             {
                 return null;

@@ -53,6 +53,12 @@ public class BindRequestImpl extends AbstractAbandonableRequest implements BindR
     /** A storage for credentials hashCode */
     private int hCredentials;
 
+    /** The one-time password, only used by the simpleotp authentication choice */
+    private byte[] otpValue;
+
+    /** Whether this Bind uses the simpleotp authentication choice */
+    private boolean isSimpleOtp;
+
     /** The mechanism used to decode user identity */
     private String mechanism;
 
@@ -110,6 +116,12 @@ public class BindRequestImpl extends AbstractAbandonableRequest implements BindR
     public BindRequest setSimple( boolean simple )
     {
         this.isSimple = simple;
+
+        // simple and simpleotp are mutually exclusive authentication choices
+        if ( simple )
+        {
+            this.isSimpleOtp = false;
+        }
 
         return this;
     }
@@ -174,6 +186,74 @@ public class BindRequestImpl extends AbstractAbandonableRequest implements BindR
      * {@inheritDoc}
      */
     @Override
+    public boolean isSimpleOtp()
+    {
+        return isSimpleOtp;
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public BindRequest setSimpleOtp( boolean isSimpleOtp )
+    {
+        this.isSimpleOtp = isSimpleOtp;
+
+        // simpleotp and SASL are mutually exclusive authentication choices
+        if ( isSimpleOtp )
+        {
+            this.mechanism = null;
+        }
+
+        return this;
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public byte[] getOtpValue()
+    {
+        return otpValue;
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public BindRequest setOtpValue( String otpValue )
+    {
+        return setOtpValue( Strings.getBytesUtf8( otpValue ) );
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public BindRequest setOtpValue( byte[] otpValue )
+    {
+        if ( otpValue != null )
+        {
+            this.otpValue = new byte[otpValue.length];
+            System.arraycopy( otpValue, 0, this.otpValue, 0, otpValue.length );
+        }
+        else
+        {
+            this.otpValue = null;
+        }
+
+        return this;
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public String getSaslMechanism()
     {
         return mechanism;
@@ -187,6 +267,7 @@ public class BindRequestImpl extends AbstractAbandonableRequest implements BindR
     public BindRequest setSaslMechanism( String saslMechanism )
     {
         this.isSimple = false;
+        this.isSimpleOtp = false;
         this.mechanism = saslMechanism;
 
         return this;
@@ -384,6 +465,11 @@ public BindRequest setName( String name )
             return false;
         }
 
+        if ( req.isSimpleOtp() != isSimpleOtp() )
+        {
+            return false;
+        }
+
         if ( req.isVersion3() != isVersion3() )
         {
             return false;
@@ -433,7 +519,8 @@ public BindRequest setName( String name )
             }
         }
 
-        return Arrays.equals( req.getCredentials(), getCredentials() );
+        return Arrays.equals( req.getCredentials(), getCredentials() )
+            && Arrays.equals( req.getOtpValue(), getOtpValue() );
     }
 
 
@@ -446,6 +533,8 @@ public BindRequest setName( String name )
         int hash = 37;
         hash = hash * 17 + ( credentials == null ? 0 : hCredentials );
         hash = hash * 17 + ( isSimple ? 0 : 1 );
+        hash = hash * 17 + ( isSimpleOtp ? 0 : 1 );
+        hash = hash * 17 + ( otpValue == null ? 0 : otpValue.length );
         hash = hash * 17 + ( isVersion3 ? 0 : 1 );
         hash = hash * 17 + ( mechanism == null ? 0 : mechanism.hashCode() );
         hash = hash * 17 + ( name == null ? 0 : name.hashCode() );
@@ -469,7 +558,13 @@ public BindRequest setName( String name )
         sb.append( "    BindRequest\n" );
         sb.append( "        Version : '" ).append( isVersion3 ? "3" : "2" ).append( "'\n" );
 
-        if ( isSimple )
+        if ( isSimpleOtp )
+        {
+            sb.append( "        Name : '" ).append( name ).append( "'\n" );
+            sb.append( "        Simpleotp authentication : password '" ).append( "(omitted-for-safety)" )
+                .append( "', otp '" ).append( "(omitted-for-safety)" ).append( "'\n" );
+        }
+        else if ( isSimple )
         {
             if ( ( Strings.isEmpty( name ) && ( ( dn == null ) || dn.equals( Dn.EMPTY_DN ) ) ) )
             {

@@ -1,0 +1,13 @@
+version: 1
+dn: m-oid=1.3.6.1.4.1.18060.0.4.1.3.14,ou=objectClasses,cn=apache,ou=schema
+m-oid: 1.3.6.1.4.1.18060.0.4.1.3.14
+m-name: simpleOtpUser
+m-description: Auxiliary class for entries that may bind with the simpleotp method
+m-supobjectclass: top
+m-typeobjectclass: AUXILIARY
+m-may: otpAuthUri
+objectclass: metaObjectClass
+objectclass: metaTop
+objectclass: top
+creatorsname: uid=admin,ou=system
+m-obsolete: FALSE

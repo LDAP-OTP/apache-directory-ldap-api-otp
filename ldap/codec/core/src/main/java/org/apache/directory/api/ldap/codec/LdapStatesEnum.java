@@ -320,6 +320,15 @@ public enum LdapStatesEnum implements States
     /** Simple State */
     SIMPLE_STATE,
 
+    /** SimpleOTP State, for the draft-joestr-wg-ldapsimpleotp authentication choice */
+    SIMPLEOTP_STATE,
+
+    /** SimpleOTP password State, inside the SimpleOTP SEQUENCE */
+    SIMPLEOTP_PASSWORD_STATE,
+
+    /** SimpleOTP OTP value State, inside the SimpleOTP SEQUENCE */
+    SIMPLEOTP_OTP_VALUE_STATE,
+
     /** Size Limit State */
     SIZE_LIMIT_STATE,
 

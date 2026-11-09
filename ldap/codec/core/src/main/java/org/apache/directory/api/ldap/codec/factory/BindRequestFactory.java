@@ -69,7 +69,18 @@ public final class BindRequestFactory implements Messagefactory
         BindRequest bindMessage = ( BindRequest ) message;
 
         // The authentication
-        if ( bindMessage.isSimple() )
+        if ( bindMessage.isSimpleOtp() )
+        {
+            // SimpleOTP authentication, as defined by draft-joestr-wg-ldapsimpleotp
+            //
+            // SimpleOTP ::= SEQUENCE {
+            //     password         OCTET STRING,
+            //     otpvalue         OCTET STRING }
+            BerValue.encodeOctetString( buffer, bindMessage.getOtpValue() );
+            BerValue.encodeOctetString( buffer, bindMessage.getCredentials() );
+            BerValue.encodeSequence( buffer, ( byte ) LdapCodecConstants.BIND_REQUEST_SIMPLEOTP_TAG, start );
+        }
+        else if ( bindMessage.isSimple() )
         {
             // Simple authentication
             BerValue.encodeOctetString( buffer, ( byte ) LdapCodecConstants.BIND_REQUEST_SIMPLE_TAG,

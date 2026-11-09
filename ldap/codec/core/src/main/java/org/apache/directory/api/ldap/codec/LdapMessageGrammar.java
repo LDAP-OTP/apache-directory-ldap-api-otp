@@ -51,10 +51,13 @@ import org.apache.directory.api.ldap.codec.actions.request.add.InitAddRequest;
 import org.apache.directory.api.ldap.codec.actions.request.add.StoreAddRequestEntryName;
 import org.apache.directory.api.ldap.codec.actions.request.bind.InitBindRequest;
 import org.apache.directory.api.ldap.codec.actions.request.bind.InitSaslBind;
+import org.apache.directory.api.ldap.codec.actions.request.bind.InitSimpleOtpBind;
 import org.apache.directory.api.ldap.codec.actions.request.bind.StoreName;
 import org.apache.directory.api.ldap.codec.actions.request.bind.StoreSaslCredentials;
 import org.apache.directory.api.ldap.codec.actions.request.bind.StoreSaslMechanism;
 import org.apache.directory.api.ldap.codec.actions.request.bind.StoreSimpleAuth;
+import org.apache.directory.api.ldap.codec.actions.request.bind.StoreSimpleOtpPassword;
+import org.apache.directory.api.ldap.codec.actions.request.bind.StoreSimpleOtpValue;
 import org.apache.directory.api.ldap.codec.actions.request.bind.StoreVersion;
 import org.apache.directory.api.ldap.codec.actions.request.compare.InitCompareRequest;
 import org.apache.directory.api.ldap.codec.actions.request.compare.StoreCompareRequestAssertionValue;
@@ -420,6 +423,65 @@ public final class LdapMessageGrammar extends
                 LdapStatesEnum.SASL_STATE,
                 LdapCodecConstants.BIND_REQUEST_SASL_TAG,
                 new InitSaslBind(),
+                FollowUp.OPTIONAL );
+
+        // --------------------------------------------------------------------------------------------
+        // Transition from name to SimpleOTP Authentication
+        // --------------------------------------------------------------------------------------------
+        // BindRequest ::= [APPLICATION 0] SEQUENCE {
+        //     ....
+        //     authentication          AuthenticationChoice }
+        //
+        // AuthenticationChoice ::= CHOICE {
+        //     ...
+        //     simpleotp             [4] SimpleOTP }
+        //
+        // Added by draft-joestr-wg-ldapsimpleotp
+        super.transitions[LdapStatesEnum.NAME_STATE.ordinal()][LdapCodecConstants.BIND_REQUEST_SIMPLEOTP_TAG] =
+            new GrammarTransition(
+                LdapStatesEnum.NAME_STATE,
+                LdapStatesEnum.SIMPLEOTP_STATE,
+                LdapCodecConstants.BIND_REQUEST_SIMPLEOTP_TAG,
+                new InitSimpleOtpBind(),
+                FollowUp.OPTIONAL );
+
+        // --------------------------------------------------------------------------------------------
+        // Transition from SimpleOTP Authentication to Password
+        // --------------------------------------------------------------------------------------------
+        // SimpleOTP ::= SEQUENCE {
+        //     password              OCTET STRING,
+        //     ... }
+        super.transitions[LdapStatesEnum.SIMPLEOTP_STATE.ordinal()][OCTET_STRING.getValue()] =
+            new GrammarTransition(
+                LdapStatesEnum.SIMPLEOTP_STATE,
+                LdapStatesEnum.SIMPLEOTP_PASSWORD_STATE,
+                OCTET_STRING,
+                new StoreSimpleOtpPassword(),
+                FollowUp.MANDATORY );
+
+        // --------------------------------------------------------------------------------------------
+        // Transition from SimpleOTP Password to OTP value
+        // --------------------------------------------------------------------------------------------
+        // SimpleOTP ::= SEQUENCE {
+        //     ...,
+        //     otpvalue              OCTET STRING }
+        super.transitions[LdapStatesEnum.SIMPLEOTP_PASSWORD_STATE.ordinal()][OCTET_STRING.getValue()] =
+            new GrammarTransition(
+                LdapStatesEnum.SIMPLEOTP_PASSWORD_STATE,
+                LdapStatesEnum.SIMPLEOTP_OTP_VALUE_STATE,
+                OCTET_STRING,
+                new StoreSimpleOtpValue(),
+                FollowUp.OPTIONAL );
+
+        // --------------------------------------------------------------------------------------------
+        // transition from SimpleOTP Authentication to Controls.
+        // --------------------------------------------------------------------------------------------
+        super.transitions[LdapStatesEnum.SIMPLEOTP_OTP_VALUE_STATE.ordinal()][LdapCodecConstants.CONTROLS_TAG] =
+            new GrammarTransition(
+                LdapStatesEnum.SIMPLEOTP_OTP_VALUE_STATE,
+                LdapStatesEnum.CONTROLS_STATE,
+                LdapCodecConstants.CONTROLS_TAG,
+                new InitControls(),
                 FollowUp.OPTIONAL );
 
         // --------------------------------------------------------------------------------------------

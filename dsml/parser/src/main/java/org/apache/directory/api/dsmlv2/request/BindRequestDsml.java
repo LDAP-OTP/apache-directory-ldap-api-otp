@@ -151,6 +151,62 @@ public class BindRequestDsml
      * {@inheritDoc}
      */
     @Override
+    public boolean isSimpleOtp()
+    {
+        return getDecorated().isSimpleOtp();
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public BindRequest setSimpleOtp( boolean isSimpleOtp )
+    {
+        getDecorated().setSimpleOtp( isSimpleOtp );
+
+        return this;
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public byte[] getOtpValue()
+    {
+        return getDecorated().getOtpValue();
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public BindRequest setOtpValue( String otpValue )
+    {
+        getDecorated().setOtpValue( otpValue );
+
+        return this;
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public BindRequest setOtpValue( byte[] otpValue )
+    {
+        getDecorated().setOtpValue( otpValue );
+
+        return this;
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public byte[] getCredentials()
     {
         return getDecorated().getCredentials();

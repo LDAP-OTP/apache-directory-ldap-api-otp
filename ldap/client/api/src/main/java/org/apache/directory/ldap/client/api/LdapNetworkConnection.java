@@ -1588,6 +1588,48 @@ public class LdapNetworkConnection extends AbstractLdapConnection implements Lda
 
 
     /**
+     * Bind to the server using the simpleotp authentication choice defined by
+     * draft-joestr-wg-ldapsimpleotp : a password together with a one-time
+     * password.
+     *
+     * @param name The Dn to bind with
+     * @param password The user's password
+     * @param otpValue The one-time password
+     * @return The BindResponse
+     * @throws LdapException If the bind failed
+     */
+    public BindResponse bindSimpleOtp( Dn name, String password, String otpValue ) throws LdapException
+    {
+        return bindSimpleOtp( name.getName(), password, otpValue );
+    }
+
+
+    /**
+     * Bind to the server using the simpleotp authentication choice defined by
+     * draft-joestr-wg-ldapsimpleotp : a password together with a one-time
+     * password.
+     *
+     * @param name The name to bind with
+     * @param password The user's password
+     * @param otpValue The one-time password
+     * @return The BindResponse
+     * @throws LdapException If the bind failed
+     */
+    public BindResponse bindSimpleOtp( String name, String password, String otpValue ) throws LdapException
+    {
+        BindRequest bindRequest = new BindRequestImpl();
+        bindRequest.setVersion3( true );
+        bindRequest.setName( name );
+        bindRequest.setSimple( false );
+        bindRequest.setSimpleOtp( true );
+        bindRequest.setCredentials( Strings.getBytesUtf8( password ) );
+        bindRequest.setOtpValue( Strings.getBytesUtf8( otpValue ) );
+
+        return bind( bindRequest );
+    }
+
+
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -5394,6 +5436,7 @@ public class LdapNetworkConnection extends AbstractLdapConnection implements Lda
                 bindRequestCopy.setName( bindRequest.getName() );
                 bindRequestCopy.setSaslMechanism( bindRequest.getSaslMechanism() );
                 bindRequestCopy.setSimple( bindRequest.isSimple() );
+                bindRequestCopy.setSimpleOtp( bindRequest.isSimpleOtp() );
                 bindRequestCopy.setVersion3( bindRequest.getVersion3() );
                 bindRequestCopy.addAllControls( bindRequest.getControls().values().toArray( new Control[0] ) );
 

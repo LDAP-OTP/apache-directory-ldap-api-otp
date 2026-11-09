@@ -204,6 +204,9 @@ public final class LdapCodecConstants
     /** Bind Request SASL tag */
     public static final int BIND_REQUEST_SASL_TAG = 0xA3;
 
+    /** Bind Request SimpleOTP tag, as defined by draft-joestr-wg-ldapsimpleotp */
+    public static final int BIND_REQUEST_SIMPLEOTP_TAG = 0xA4;
+
     /** LDAP Result Refrral Sequence Tag */
     public static final int LDAP_RESULT_REFERRAL_SEQUENCE_TAG = 0xA3;
 

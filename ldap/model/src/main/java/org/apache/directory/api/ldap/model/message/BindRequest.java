@@ -89,6 +89,54 @@ public interface BindRequest extends SingleReplyRequest, AbandonableRequest
 
 
     /**
+     * Tells if this request uses the simpleotp authentication choice, as
+     * defined by draft-joestr-wg-ldapsimpleotp: a password together with a
+     * one-time password.
+     *
+     * @return true if this is a simpleotp bind, false otherwise
+     */
+    boolean isSimpleOtp();
+
+
+    /**
+     * Marks this request as using the simpleotp authentication choice.
+     *
+     * @param isSimpleOtp true to use simpleotp authentication
+     * @return The BindRequest instance
+     */
+    BindRequest setSimpleOtp( boolean isSimpleOtp );
+
+
+    /**
+     * Gets the one-time password carried by a simpleotp authentication
+     * attempt. Returns null for every other authentication choice.
+     *
+     * @return the OTP value, or null if this is not a simpleotp bind
+     */
+    byte[] getOtpValue();
+
+
+    /**
+     * Sets the one-time password carried by a simpleotp authentication
+     * attempt.
+     *
+     * @param otpValue the OTP value, UTF-8 encoded
+     * @return The BindRequest instance
+     */
+    BindRequest setOtpValue( String otpValue );
+
+
+    /**
+     * Sets the one-time password carried by a simpleotp authentication
+     * attempt.
+     *
+     * @param otpValue the OTP value, UTF-8 encoded
+     * @return The BindRequest instance
+     */
+    BindRequest setOtpValue( byte[] otpValue );
+
+
+    /**
      * Gets the name of the subject in this authentication
      * request. This field may take on a null value (a zero length string) for
      * the purposes of anonymous binds, when authentication has been performed
